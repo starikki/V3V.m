@@ -26,8 +26,8 @@ Zbskip = 1;
 
 %% Base Info
 %RIGID
-Xshift=[36; 18.3]; %x-axis + to shift fwd
-Yshift=[48; 30];  % Z-axis, + to shift up
+Xshift=[36; 36]; %x-axis + to shift fwd
+Yshift=[48; 18];  % Z-axis, + to shift up
 Zshift=[640; 790]; % Y-axis + to shift right
 
 FreestreamVel=[0.295; 0.295];
@@ -38,7 +38,8 @@ XVolSize=[-120 60; -200 200];        %-96 30
 YVolSize=[-72 24; -100 100];
 ZVolSize=[-12 42; 0 360];
 
-Rotate=[0 0 0 0 0 1 1 1]; %Rotate volumes
+Flip=[-1,-1,-1,-1,1,1;
+        1,1,1,1,1,1]; %Rotate volumes
 
 
 Xshift=Xshift(VolNum);
@@ -129,14 +130,14 @@ toc
  
 
 Xnew = Xnew + Xshift;
-Xnew = Xnew * -1;   % Flip
+Xnew = Xnew * Flip(VolNum,1);   % Flip
 Ynew = Ynew + Yshift;
-Ynew = Ynew * -1;   % Flip
+Ynew = Ynew * Flip(VolNum,2);   % Flip
 Znew = Znew + Zshift;
-Znew = Znew * -1;
-Unew = Unew*1;
-Vnew = Vnew*1;
-Wnew = Wnew*1;
+Znew = Znew * Flip(VolNum,3);
+Unew = Unew*Flip(VolNum,4);
+Vnew = Vnew*Flip(VolNum,5);
+Wnew = Wnew*Flip(VolNum,6);
 
 
 
@@ -397,13 +398,18 @@ VelMagcol=reshape(VelMagI, size(VelMagI,1)*size(VelMagI,2)*size(VelMagI,3),1);
 % % 
 % % GammaXcol=reshape(GammaX, size(GammaX,1)*size(GammaX,2)*size(GammaX,3),1);
 
-%% %%%%%%%%%%%%%%%   NON-DIMENSIONALIZE AND SHIFT   %%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%   NON-DIMENSIONALIZE   %%%%%%%%%%%%%%%%%%%%%%%%
 VorticityXcol=VorticityXcol*chord/FreestreamVel;
 VorticityYcol=VorticityYcol*chord/FreestreamVel;
 VorticityZcol=VorticityZcol*chord/FreestreamVel;
 VorticityMagcol=VorticityMagcol*chord/FreestreamVel;
 VelMagcol=VelMagcol/FreestreamVel;
 Qcol=Qcol*chord/FreestreamVel;
+
+Ucol = Ucol/FreestreamVel;
+Vcol = Vcol/FreestreamVel;
+Wcol = Wcol/FreestreamVel;
+
 
 %% TRIM TOP AND BOTTOM OF DATA - if required
 %  GammaXcol(Xcol<XMin | Xcol>XMax)=NaN;
