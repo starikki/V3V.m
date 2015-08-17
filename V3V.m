@@ -16,6 +16,7 @@ Trim = 0; % Matrix Box trim
 Xbskip = 2;
 Ybskip = 2;
 Zbskip = 1;
+CHC_filter = 500;
 
 %%%%%%%%%% sAR = 3 %%%%%%%%%%%%%%%
 %FreestreamVel=[0.1065; 0.1051; 0.1051; 0.1045; 0.1045;];
@@ -115,9 +116,9 @@ toc
 %     Vnew(CHC==-1)=NaN;
 %     Wnew(CHC==-1)=NaN;
     
-    Unew(CHC<=500)=NaN;
-    Vnew(CHC<=500)=NaN;
-    Wnew(CHC<=500)=NaN;
+    Unew(CHC<=CHC_filter)=NaN;
+    Vnew(CHC<=CHC_filter)=NaN;
+    Wnew(CHC<=CHC_filter)=NaN;
 
 % %   DELETE ROWS AND COLUMS WITH FULL NAN
 %     Unew = Unew(:,any(~isnan(Unew)));  % for columns
@@ -464,17 +465,21 @@ VorticityZcol(isinf(VorticityZcol)==1)=0;
 VorticityMagcol(isinf(VorticityMagcol)==1)=0;
 Qcol(isinf(Qcol)==1)=0;
 %  GammaX(isinf(GammaX)==1)=0;
+
+% Core axial velocity difference
+dUcol = (1-Ucol)/1;
+ dUcol(CHCcol<=700)=0;
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%   WRITE TO FILE   %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cd(HomeCD)
 HeaderText = ['Title="' Current_name(1:10) '" '...
-    'VARIABLES="X","Y","Z","U/U<math>%</math>","V/U<math>%</math>","W/U<math>%</math>","CHC","Velocity Magnitude","<greek>w</greek><sub>X</sub>c /U<math>%</math>","<greek>w</greek><sub>Y</sub>c /U<math>%</math>","<greek>w</greek><sub>Z</sub>c /U<math>%</math>","Vorticity Magnitude","QCriterion",DATASETAUXDATA Position_Unit="mm",DATASETAUXDATA Velocity_Unit="m/s",DATASETAUXDATA Vorticity_Unit="1/s",DATASETAUXDATA DataType="V",DATASETAUXDATA Dimension="3",DATASETAUXDATA HasVelocity="Y",DATASETAUXDATA ExtraDataNumber="6",DATASETAUXDATA GridSpacingX="'...
+    'VARIABLES="X","Y","Z","U/U<math>%</math>","V/U<math>%</math>","W/U<math>%</math>","CHC","Velocity Magnitude","<greek>w</greek><sub>X</sub>c /U<math>%</math>","<greek>w</greek><sub>Y</sub>c /U<math>%</math>","<greek>w</greek><sub>Z</sub>c /U<math>%</math>","Vorticity Magnitude","QCriterion","Axial Velocity",DATASETAUXDATA Position_Unit="mm",DATASETAUXDATA Velocity_Unit="m/s",DATASETAUXDATA Vorticity_Unit="1/s",DATASETAUXDATA DataType="V",DATASETAUXDATA Dimension="3",DATASETAUXDATA HasVelocity="Y",DATASETAUXDATA ExtraDataNumber="6",DATASETAUXDATA GridSpacingX="'...
     num2str(dx) '",DATASETAUXDATA GridSpacingY="' num2str(dy) '",DATASETAUXDATA GridSpacingZ="' num2str(dz) '",DATASETAUXDATA FirstNodeX="' num2str(FirstX) '",DATASETAUXDATA FirstNodeY="' num2str(FirstY) '",DATASETAUXDATA FirstNodeZ="' num2str(FirstZ)...
     '",ZONE T="' Current_name(1:15) '",I=' num2str(size(XI, 1)) ',J=' num2str(size(XI, 2)) ',K=' num2str(size(XI, 3)) ',F=POINT,'];
 
 fid=fopen(strcat(Fullname, '.plt'), 'w');
 fprintf(fid, '%s \n', HeaderText);
 fclose(fid);
-dlmwrite(strcat(Fullname, '.plt'), [Xcol Ycol Zcol Ucol Vcol Wcol CHCcol VelMagcol VorticityXcol VorticityYcol VorticityZcol VorticityMagcol Qcol], '-append')
+dlmwrite(strcat(Fullname, '.plt'), [Xcol Ycol Zcol Ucol Vcol Wcol CHCcol VelMagcol VorticityXcol VorticityYcol VorticityZcol VorticityMagcol Qcol dUcol], '-append')
 toc
 end
 % for VV = min(VorticityXI(:)):1:max(VorticityXI(:))
