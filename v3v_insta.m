@@ -6,8 +6,8 @@ clear
 disp('running...' )
 % --- Outputs from this function are returned to the command line.
 % function V3VData()
-VolNum=1;
-Blanking = 0.8;
+VolNum=2;
+Blanking = 0.2;
 WingClip = 0;
 
 % parameter to control deleting data under shielded areas
@@ -24,17 +24,17 @@ Zbskip = 1;
 
 %% Base Info
 %RIGID
-Xshift=[28; 18.3];
-Yshift=[7; 30];
-Zshift=[648; 790];
+Xshift=[36; 28]; %x-axis + to shift fwd
+Yshift=[48; 7];  % Z-axis, + to shift up
+Zshift=[638; 648]; % Y-axis + to shift right
 
 FreestreamVel=[0.295; 0.295];
 chord = 0.06;
 span = 0.24;
 
-XVolSize=[-120 60; -100 100];        %-96 30
-YVolSize=[-72 24; -100 100];
-ZVolSize=[-12 42; 0 360];
+XVolSize=[-120 60; -120 60];        %-96 30
+YVolSize=[-72 24; -72 24];
+ZVolSize=[-12 42; -12 42];
 
 Rotate=[0 0 0 0 0 1 1 1]; %Rotate volumes
 
@@ -60,7 +60,7 @@ HomeCD=cd;
 %% Load Files
 [filename,pathname] = uigetfile('*.GV3D','select Ensembled', 'MultiSelect','on');
 
-
+m_dir= pwd;
 
     %fid(f)=fopen(Fullname);
 Nfile = size(filename,2);   
@@ -73,11 +73,20 @@ tic;
 if Nfile == 1
         Fullname = [pathname,filename];
         Current_name = ['Grp_',filename];
+        
 else
         Fullname = [pathname,filename{1,f}];
         Current_name = ['Grp_',filename{1,f}];
 end
 
+
+        if f ==1
+        Save_dir = [m_dir,'\',Current_name(1:7)];
+        mkdir(Save_dir);
+        end
+
+Save_name = [Save_dir,'\',Current_name];
+        
 % Add serial number onto files
 NumA= strfind(Current_name,'A000');
 
@@ -124,7 +133,15 @@ toc
 %     Wnew = Wnew(:,any(~isnan(Wnew)));  % for columns
 %     Wnew = Wnew(any(~isnan(Wnew),2),:);   %for rows   
 
- 
+Xnew = Xnew + Xshift(VolNum);
+Xnew = Xnew * Flip(VolNum,1);   % Flip
+Ynew = Ynew + Yshift(VolNum);
+Ynew = Ynew * Flip(VolNum,2);   % Flip
+Znew = Znew + Zshift(VolNum);
+Znew = Znew * Flip(VolNum,3);
+Unew = Unew*Flip(VolNum,4);
+Vnew = Vnew*Flip(VolNum,5);
+Wnew = Wnew*Flip(VolNum,6);
 
 Xnew = Xnew + Xshift;
 Xnew = Xnew * -1;   % Flip
@@ -332,30 +349,30 @@ VorticityMagcol=VorticityMagcol*chord/FreestreamVel;
 VelMagcol=VelMagcol/FreestreamVel;
 Qcol=Qcol*chord/FreestreamVel;
 
-%% TRIM TOP AND BOTTOM OF DATA - if required
-%  GammaXcol(Xcol<XMin | Xcol>XMax)=NaN;
-VorticityXcol(Xcol<XMin | Xcol>XMax)=NaN;
-VorticityYcol(Xcol<XMin | Xcol>XMax)=NaN;
-VorticityZcol(Xcol<XMin | Xcol>XMax)=NaN;
-VorticityMagcol(Xcol<XMin | Xcol>XMax)=NaN;
-VelMagcol(Xcol<XMin | Xcol>XMax)=NaN;
-Qcol(Xcol<XMin | Xcol>XMax)=NaN;
-
-%  GammaXcol(Ycol<YMin | Ycol>YMax)=NaN;
-VorticityXcol(Ycol<YMin | Ycol>YMax)=NaN;
-VorticityYcol(Ycol<YMin | Ycol>YMax)=NaN;
-VorticityZcol(Ycol<YMin | Ycol>YMax)=NaN;
-VorticityMagcol(Ycol<YMin | Ycol>YMax)=NaN;
-VelMagcol(Ycol<YMin | Ycol>YMax)=NaN;
-Qcol(Ycol<YMin | Ycol>YMax)=NaN;
-
-%  GammaXcol(Zcol<ZMin | Zcol>ZMax)=NaN;
-VorticityXcol(Zcol<ZMin | Zcol>ZMax)=NaN;
-VorticityYcol(Zcol<ZMin | Zcol>ZMax)=NaN;
-VorticityZcol(Zcol<ZMin | Zcol>ZMax)=NaN;
-VorticityMagcol(Zcol<ZMin | Zcol>ZMax)=NaN;
-VelMagcol(Zcol<ZMin | Zcol>ZMax)=NaN;
-Qcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % %% TRIM TOP AND BOTTOM OF DATA - if required
+% % %  GammaXcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % VorticityXcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % VorticityYcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % VorticityZcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % VorticityMagcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % VelMagcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % Qcol(Xcol<XMin | Xcol>XMax)=NaN;
+% % 
+% % %  GammaXcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % VorticityXcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % VorticityYcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % VorticityZcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % VorticityMagcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % VelMagcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % Qcol(Ycol<YMin | Ycol>YMax)=NaN;
+% % 
+% % %  GammaXcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % VorticityXcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % VorticityYcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % VorticityZcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % VorticityMagcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % VelMagcol(Zcol<ZMin | Zcol>ZMax)=NaN;
+% % Qcol(Zcol<ZMin | Zcol>ZMax)=NaN;
 %% Conditional Value blaking!
  VorticityMagcol(VorticityXcol>-Blanking & VorticityXcol<Blanking)=NaN; %Trim off 
 % VorticityXcol(VorticityXcol>-0.5 & VorticityXcol<0.5)=NaN; %Clean the mess
@@ -394,10 +411,10 @@ HeaderText = ['Title="' Current_name(1:7) '" '...
     num2str(dx) '",DATASETAUXDATA GridSpacingY="' num2str(dy) '",DATASETAUXDATA GridSpacingZ="' num2str(dz) '",DATASETAUXDATA FirstNodeX="' num2str(FirstX) '",DATASETAUXDATA FirstNodeY="' num2str(FirstY) '",DATASETAUXDATA FirstNodeZ="' num2str(FirstZ)...
     '",ZONE T="' strcat(Current_name(1:7),Current_name(NumA:NumA+6)) '",I=' num2str(size(XI, 1)) ',J=' num2str(size(XI, 2)) ',K=' num2str(size(XI, 3)) ',F=POINT,'];
 
-fid=fopen(strcat(Fullname, '.plt'), 'w');
+fid=fopen(strcat(Save_name, '.plt'), 'w');
 fprintf(fid, '%s \n', HeaderText);
 fclose(fid);
-dlmwrite(strcat(Fullname, '.plt'), [Xcol Ycol Zcol Ucol Vcol Wcol CHCcol VelMagcol VorticityXcol VorticityYcol VorticityZcol VorticityMagcol Qcol], '-append')
+dlmwrite(strcat(Save_name, '.plt'), [Xcol Ycol Zcol Ucol Vcol Wcol CHCcol VelMagcol VorticityXcol VorticityYcol VorticityZcol VorticityMagcol Qcol], '-append')
 toc
 end
 % for VV = min(VorticityXI(:)):1:max(VorticityXI(:))
